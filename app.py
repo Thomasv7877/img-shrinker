@@ -24,11 +24,11 @@ class MainWidget(QMainWindow):
         self.label = QLabel(self)
         self.label.setText("Drag image(s) here\n+")
         self.label.setFont(QFont('Arial', 16))
-        self.label.setAlignment(Qt.Alignment.AlignCenter)
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label.setFixedHeight(self.imageHeight)
         self.blankLabel = True
         
-        self.slider = QSlider(Qt.Orientations.Horizontal)
+        self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setMinimum(1)
         self.slider.setMaximum(100)
         self.slider.setValue(33)
@@ -36,7 +36,7 @@ class MainWidget(QMainWindow):
 
         self.urls = []
         self.grid = QGridLayout()
-        self.grid.addWidget(self.label, 0, 0, Qt.Alignment.AlignCenter)
+        self.grid.addWidget(self.label, 0, 0, Qt.AlignmentFlag.AlignCenter)
         widget = QWidget()
         widget.setMaximumWidth(self.width())
         widget.setMaximumHeight(self.height() - self.button1.height()) # - self.slider.height()
@@ -91,22 +91,29 @@ class MainWidget(QMainWindow):
             print(f)
             pixmap = QPixmap(f)
             tempLabel = QLabel()
-            tempLabel.setPixmap(pixmap.scaled(self.width() / 4,self.imageHeight,aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio))
-            #tempLabel.setPixmap(pixmap.scaled(self.width(),self.imageHeight,aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio, transformMode= Qt.TransformationMode.SmoothTransformation))
+            tempLabel.setPixmap(pixmap.scaled(int(self.width() / 4),self.imageHeight,aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio))
+            #tempLabel.setPixmap(pixmap.scaled(int(self.width() / 4),self.imageHeight,aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio, transformMode= Qt.TransformationMode.SmoothTransformation))
             #tempLabel.setPixmap(pixmap)
             #tempLabel.setAlignment(Qt.Alignment.AlignCenter)
             print(self.getPos())
             pos = self.getPos()
-            self.grid.addWidget(tempLabel, pos[0], pos[1], Qt.Alignment.AlignCenter)
+            self.grid.addWidget(tempLabel, pos[0], pos[1], Qt.AlignmentFlag.AlignCenter)
             self.urls.append(f)
+            self.label.setText("")
 
     def compressMe(self, files):
         for file in files:
             filepath = os.path.join(os.getcwd(), file)
-            picture = Image.open(filepath)
-            ext = file[-3:]
-            proto = "JPEG" if ext.lower() == 'jpg' else "png"
-            picture.save(file[:-4] + "_Compressed." + ext, proto, optimize = True, quality = self.slider.value())
+            pic = Image.open(filepath)
+            pic_split = file.split('.')
+            ext = pic_split[1]
+            proto = "WEBP" if ext.lower() == 'WEBP' else "JPEG"
+            if ext == 'png':
+                rgb_pic = pic.convert('RGB')
+                ext = 'jpg'
+            else:
+                rgb_pic = pic
+            rgb_pic.save(pic_split[0] + "_Compressed." + ext, proto, optimize = True, quality = self.slider.value())
 
     def button1_clicked(self, event):
         #print("Button 1 clicked for image: " + self.imagePath)
